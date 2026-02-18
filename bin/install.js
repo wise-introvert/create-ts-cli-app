@@ -8,7 +8,11 @@ import { spawnSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 
 function runCommand(command, args, options) {
-  const result = spawnSync(command, args, options);
+  const result = spawnSync(command, args, {
+    ...options,
+    shell: true,
+    encoding: "utf-8"
+  });
 
   if (result.error) {
     console.error(
@@ -125,7 +129,7 @@ writeFileSync(packageJsonAbsPath, JSON.stringify(packageJson, null, 2));
 StatusMessages.FILES_COPIED(projectDirectoryAbsPath);
 
 StatusMessages.NPM_INSTALL();
-const npmInstallResult = spawnSync("npm", ["install"], {
+const npmInstallResult = runCommand("npm", ["install"], {
   stdio: "inherit",
   cwd: projectDirectoryAbsPath,
 });
@@ -136,7 +140,7 @@ if (npmInstallResult.error) {
 StatusMessages.PACKAGES_INSTALLED();
 
 if (IS_WINDOWS_PLATFORM) {
-  runCommand("del", [".git"], {
+  runCommand("del", ["/q", ".git"], {
     stdio: "ignore",
     cwd: projectDirectoryAbsPath,
   });
